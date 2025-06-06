@@ -6,36 +6,36 @@ import torch
 import psutil  # for RAM usage
 import os
 
-# Load model and check device
+# load model and check device
 model = YOLO("yolov8l-seg.pt")
 device = model.device
 print(f"\nModel is using: {device}")
 
-# If using CUDA, print GPU name
+# if it uses CUDA, print GPU name
 if torch.cuda.is_available():
     print(f"GPU Name: {torch.cuda.get_device_name(0)}")
     print("CUDA Memory Usage (MB):")
     print(f"  Allocated: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB")
     print(f"  Reserved:  {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB\n")
 
-# Open webcam
+# open the webcam
 cap = cv2.VideoCapture(0)
 
 while True:
-    start_total = time.perf_counter()  # Start total frame timer
+    start_total = time.perf_counter()  # total frame timer
 
     ret, frame = cap.read()
     if not ret:
         break
 
-    # Model inference timer
+    # interferance timer
     start_model = time.perf_counter()
     results = model(frame)[0]
     end_model = time.perf_counter()
 
     overlay = frame.copy()
 
-    # Mask processing timer
+    # mask processing timer
     start_mask = time.perf_counter()
     if results.masks is not None:
         for i, mask in enumerate(results.masks.data):
@@ -69,10 +69,10 @@ while True:
 
     end_mask = time.perf_counter()
 
-    # Show output
+    # show output
     cv2.imshow("Masked Segmentation", overlay)
 
-    # System resource usage
+    # system resource usage
     process = psutil.Process(os.getpid())
     ram_usage = process.memory_info().rss / 1024**2  # in MB
 
@@ -82,10 +82,10 @@ while True:
     else:
         gpu_alloc = gpu_reserved = 0
 
-    # Total frame timing
+    # total frame timing
     end_total = time.perf_counter()
 
-    # Print timing and usage info
+    # print timing and usage info
     print(f"Model inference time: {end_model - start_model:.4f} sec")
     print(f"Mask processing time: {end_mask - start_mask:.4f} sec")
     print(f"Total frame time: {end_total - start_total:.4f} sec")
